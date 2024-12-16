@@ -1,6 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:loginfacebook/home_page.dart';
+import 'package:loginfacebook/home_screen.dart';
+import 'package:loginfacebook/onboarding.dart';
+import 'package:loginfacebook/onboarding_facebook.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -19,53 +22,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _getUserData();
   }
 
-  // Lấy thông tin người dùng từ Firebase Authentication và Firestore
-void _getUserData() async {
-  final user = FirebaseAuth.instance.currentUser;
+  void _getUserData() async {
+    final user = FirebaseAuth.instance.currentUser;
 
-  if (user != null) {
-    // Lấy thông tin người dùng từ Firestore
-    try {
-      // Lấy tài liệu người dùng từ Firestore
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-
-      // Kiểm tra xem tài liệu có tồn tại không
-      if (userDoc.exists) {
-        // Cập nhật các giá trị từ Firestore
-        setState(() {
-          _user = user;
-          _fullName = userDoc['fullName'] ?? user.displayName ?? 'Chưa có tên';
-          _email = user.email;
-          _photoURL = 'https://scontent.fsgn15-1.fna.fbcdn.net/v/t39.30808-6/444770756_493498203100405_602131800872719834_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHrU9W_yX6eQZA6cQtnyOkg-eYwI77nO1n55jAjvuc7Wezj3ORebYtf1UeyQE-muHd6cN0v9yzADHpi_3k20c_A&_nc_ohc=1QriCTMJl5IQ7kNvgEw8X6j&_nc_zt=23&_nc_ht=scontent.fsgn15-1.fna&_nc_gid=AC5G4bUStQze8m6JhLkxyJB&oh=00_AYDQjSO4z55eLWLs9i5eBIfifjgZ0vc4ocO8RMjLYfmCHw&oe=6757311E' ?? 'https://scontent.fsgn15-1.fna.fbcdn.net/v/t39.30808-6/444770756_493498203100405_602131800872719834_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHrU9W_yX6eQZA6cQtnyOkg-eYwI77nO1n55jAjvuc7Wezj3ORebYtf1UeyQE-muHd6cN0v9yzADHpi_3k20c_A&_nc_ohc=1QriCTMJl5IQ7kNvgEw8X6j&_nc_zt=23&_nc_ht=scontent.fsgn15-1.fna&_nc_gid=AC5G4bUStQze8m6JhLkxyJB&oh=00_AYDQjSO4z55eLWLs9i5eBIfifjgZ0vc4ocO8RMjLYfmCHw&oe=6757311E';
-        });
-      } else {
-        // Nếu không có tài liệu người dùng, vẫn giữ thông tin từ FirebaseAuth
-        setState(() {
-          _user = user;
-          _fullName = user.displayName ?? 'Chưa có tên';
-          _email = user.email;
-          _photoURL = user.photoURL ?? 'https://via.placeholder.com/150';
-        });
-      }
-    } catch (e) {
-      print('Lỗi khi lấy dữ liệu người dùng từ Firestore: $e');
-      // Nếu có lỗi, vẫn sử dụng thông tin từ FirebaseAuth
+    if (user != null) {
       setState(() {
         _user = user;
         _fullName = user.displayName ?? 'Chưa có tên';
         _email = user.email;
-        _photoURL = 'https://scontent.fsgn15-1.fna.fbcdn.net/v/t39.30808-6/444770756_493498203100405_602131800872719834_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHrU9W_yX6eQZA6cQtnyOkg-eYwI77nO1n55jAjvuc7Wezj3ORebYtf1UeyQE-muHd6cN0v9yzADHpi_3k20c_A&_nc_ohc=1QriCTMJl5IQ7kNvgEw8X6j&_nc_zt=23&_nc_ht=scontent.fsgn15-1.fna&_nc_gid=AC5G4bUStQze8m6JhLkxyJB&oh=00_AYDQjSO4z55eLWLs9i5eBIfifjgZ0vc4ocO8RMjLYfmCHw&oe=6757311E' ?? 'https://via.placeholder.com/150';
+        _photoURL = user.photoURL ?? 'https://scontent.fsgn15-1.fna.fbcdn.net/v/t39.30808-6/454637452_1169598934588116_991644084925666158_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=a5f93a&_nc_eui2=AeF2-DjnF46h4g3BUe9PtyCjlKqMwLSvuJmUqozAtK-4mQzN2hNRp6gZ5DlGn8NQGDZ-UakxzpyF-NCni_ZyW8to&_nc_ohc=0SDHYmTsNUIQ7kNvgG9qpde&_nc_zt=23&_nc_ht=scontent.fsgn15-1.fna&_nc_gid=ArnD1Wyn_P-dxIBt091Jfso&oh=00_AYBdXFdSEq8mdz1QpJQrbN2exm4tf12M4OScXHZvm4RRBA&oe=67660E60';
       });
     }
   }
-}
 
+  // Hàm đăng xuất
+  Future<void> _signOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      if (mounted) {
+        // Chuyển hướng về màn hình đăng nhập
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Onboarding()),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      print('Lỗi khi đăng xuất: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đăng xuất thất bại: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Hồ Sơ Cá Nhân'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _signOut,
+            tooltip: 'Đăng xuất',
+          ),
+        ],
       ),
       body: _user == null
           ? Center(child: CircularProgressIndicator())
@@ -92,6 +93,15 @@ void _getUserData() async {
                       Text(
                         "Email: $_email",
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                      SizedBox(height: 20),
+                      ElevatedButton.icon(
+                        icon: Icon(Icons.logout),
+                        label: Text('Đăng xuất'),
+                        onPressed: _signOut,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
                       ),
                     ],
                   ),

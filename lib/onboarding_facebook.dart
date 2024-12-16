@@ -33,7 +33,7 @@ class _FacebookAuthenticationState extends State<FacebookAuthentication> {
               Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => LogoutPage())); // Chuyển qua trang HomeScreen
+                      builder: (context) => HomeScreen())); // Chuyển qua trang HomeScreen
             }
           } catch (e) {
              StatusAlert.show(context,
